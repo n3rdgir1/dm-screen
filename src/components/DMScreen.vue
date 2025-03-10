@@ -2,7 +2,7 @@
   <div class="dm-screen">
     <h1>DM Screen</h1>
     <button @click="openPlayerView">Open Player View</button>
-    <button @click="toggleThinkingMode">{{ thinkingMode ? 'Stop Thinking Mode' : 'Start Thinking Mode' }}</button>
+    <ThinkingMode mode="dm" />
     <ImageUpload @image-uploaded="setImageUrl" mode="dm"/>
     <PlayerStats />
     <NPCTracker />
@@ -13,29 +13,23 @@
 import PlayerStats from './PlayerStats.vue';
 import NPCTracker from './NPCTracker.vue';
 import ImageUpload from './ImageUpload.vue';
+import ThinkingMode from './ThinkingMode.vue';
 
 export default {
   components: {
     PlayerStats,
     NPCTracker,
     ImageUpload,
+    ThinkingMode,
   },
   data() {
     return {
-      thinkingMode: false,
     };
   },
   methods: {
     openPlayerView() {
       window.open('/player-view', '_blank');
     },
-    toggleThinkingMode() {
-      this.thinkingMode = !this.thinkingMode;
-      localStorage.setItem('thinkingMode', this.thinkingMode);
-    },
-  },
-  mounted() {
-    this.thinkingMode = localStorage.getItem('thinkingMode') === 'true';
   },
 };
 </script>

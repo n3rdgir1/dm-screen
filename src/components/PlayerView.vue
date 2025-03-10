@@ -1,49 +1,26 @@
 <template>
   <div class="player-view">
     <ImageUpload mode="player"/>
-    <div v-if="thinkingMode" class="tips">
-      <h2>DM Is Thinking...</h2>
-      <p>{{ currentTip }}</p>
-    </div>
+    <ThinkingMode mode="player" />
   </div>
 </template>
 
 <script>
 import { tips } from '../tips';
 import ImageUpload from './ImageUpload.vue';
+import ThinkingMode from './ThinkingMode.vue';
 export default {
   components: {
     ImageUpload,
+    ThinkingMode,
   },
   data() {
     return {
-      thinkingMode: false,
       tips: tips,
-      currentTip: '',
-      thinkingModeInterval: null,
     };
   },
-  methods: {
-    getRandomTip() {
-      const randomIndex = Math.floor(Math.random() * this.tips.length);
-      this.currentTip = this.tips[randomIndex];
-    },
-    checkThinkingMode() {
-      // Logic to check if thinking mode is activated
-      console.log('Checking thinking mode...');
-      this.thinkingMode = localStorage.getItem('thinkingMode') === 'true';
-      if (this.thinkingMode) {
-        this.getRandomTip();
-      }
-    },
-  },
-  mounted() {
-    this.checkThinkingMode();
-    this.thinkingModeInterval = setInterval(this.checkThinkingMode, 5000);
-  },
-  beforeUnmount() {
-    clearInterval(this.thinkingModeInterval);
-  },
+  mounted() {},
+  beforeUnmount() {},
 };
 </script>
 
