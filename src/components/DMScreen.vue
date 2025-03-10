@@ -3,6 +3,7 @@
     <h1>DM Screen</h1>
     <button @click="openPlayerView">Open Player View</button>
     <button @click="toggleThinkingMode">{{ thinkingMode ? 'Stop Thinking Mode' : 'Start Thinking Mode' }}</button>
+    <ImageUpload @image-uploaded="setImageUrl" mode="dm"/>
     <PlayerStats />
     <NPCTracker />
   </div>
@@ -11,11 +12,13 @@
 <script>
 import PlayerStats from './PlayerStats.vue';
 import NPCTracker from './NPCTracker.vue';
+import ImageUpload from './ImageUpload.vue';
 
 export default {
   components: {
     PlayerStats,
     NPCTracker,
+    ImageUpload,
   },
   data() {
     return {

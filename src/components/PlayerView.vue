@@ -1,5 +1,6 @@
 <template>
   <div class="player-view">
+    <ImageUpload mode="player"/>
     <div v-if="thinkingMode" class="tips">
       <h2>DM Is Thinking...</h2>
       <p>{{ currentTip }}</p>
@@ -9,7 +10,11 @@
 
 <script>
 import { tips } from '../tips';
+import ImageUpload from './ImageUpload.vue';
 export default {
+  components: {
+    ImageUpload,
+  },
   data() {
     return {
       thinkingMode: false,
@@ -49,6 +54,7 @@ export default {
   align-items: center;
   height: 100vh; /* Full viewport height */
   text-align: center;
+  flex-direction: column;
 }
 .tips {
   /* Add your styles here */
