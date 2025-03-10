@@ -3,11 +3,17 @@
     <h1>DM Screen</h1>
     <button @click="openPlayerView">Open Player View</button>
     <button @click="toggleThinkingMode">{{ thinkingMode ? 'Stop Thinking Mode' : 'Start Thinking Mode' }}</button>
+    <PlayerStats />
   </div>
 </template>
 
 <script>
+import PlayerStats from './PlayerStats.vue';
+
 export default {
+  components: {
+    PlayerStats,
+  },
   data() {
     return {
       thinkingMode: false,
