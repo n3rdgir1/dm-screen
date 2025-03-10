@@ -48,7 +48,11 @@ export default {
 
 <style scoped>
 .player-view {
-  /* Add your styles here */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Full viewport height */
+  text-align: center;
 }
 .tips {
   /* Add your styles here */
