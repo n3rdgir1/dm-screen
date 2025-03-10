@@ -1,7 +1,7 @@
 <template>
   <div class="player-view">
     <div v-if="thinkingMode" class="tips">
-      <h2>Thinking Mode</h2>
+      <h2>DM Is Thinking...</h2>
       <p>{{ currentTip }}</p>
     </div>
   </div>
@@ -19,6 +19,7 @@ export default {
         // Add more tips here
       ],
       currentTip: '',
+      thinkingModeInterval: null,
     };
   },
   methods: {
@@ -26,12 +27,21 @@ export default {
       const randomIndex = Math.floor(Math.random() * this.tips.length);
       this.currentTip = this.tips[randomIndex];
     },
+    checkThinkingMode() {
+      // Logic to check if thinking mode is activated
+      console.log('Checking thinking mode...');
+      this.thinkingMode = localStorage.getItem('thinkingMode') === 'true';
+      if (this.thinkingMode) {
+        this.getRandomTip();
+      }
+    },
   },
   mounted() {
-    this.thinkingMode = localStorage.getItem('thinkingMode') === 'true';
-    if (this.thinkingMode) {
-      this.getRandomTip();
-    }
+    this.checkThinkingMode();
+    this.thinkingModeInterval = setInterval(this.checkThinkingMode, 5000);
+  },
+  beforeUnmount() {
+    clearInterval(this.thinkingModeInterval);
   },
 };
 </script>
