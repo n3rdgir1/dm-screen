@@ -4,15 +4,18 @@
     <button @click="openPlayerView">Open Player View</button>
     <button @click="toggleThinkingMode">{{ thinkingMode ? 'Stop Thinking Mode' : 'Start Thinking Mode' }}</button>
     <PlayerStats />
+    <NPCTracker />
   </div>
 </template>
 
 <script>
 import PlayerStats from './PlayerStats.vue';
+import NPCTracker from './NPCTracker.vue';
 
 export default {
   components: {
     PlayerStats,
+    NPCTracker,
   },
   data() {
     return {
