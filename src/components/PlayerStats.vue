@@ -1,8 +1,10 @@
 <template>
   <div class="player-stats">
-    <h2>Player Stats</h2>
-    <button @click="toggleMode">{{ editMode ? 'View' : 'Edit' }}</button>
-    <button v-if="editMode" @click="addPlayer">Add Player</button>
+    <div class="header">  
+      <h2>Player Stats</h2>
+      <button @click="toggleMode">{{ editMode ? 'View' : 'Edit' }}</button>
+      <button v-if="editMode" @click="addPlayer">Add Player</button>
+    </div>
     <table>
       <thead>
         <tr>
@@ -134,5 +136,10 @@ export default {
 .player label {
   display: block;
   margin-bottom: 5px;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 </style>

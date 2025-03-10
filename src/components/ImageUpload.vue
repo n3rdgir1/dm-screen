@@ -1,7 +1,10 @@
 <template>
   <div>
-    <input v-if="mode === 'dm'" type="file" @change="onFileChange" accept="image/*" />
-    <button v-if="mode === 'dm' && imageUrl" @click="removeImage">Remove Image</button>
+    <div v-if="mode === 'dm'" class="header">
+      <h2>Image Upload</h2>
+      <input type="file" @change="onFileChange" accept="image/*" />
+      <button v-if="imageUrl" @click="removeImage">Remove Image</button>
+    </div>
     <img v-if="imageUrl" :src="imageUrl" alt="Uploaded Image" />
   </div>
 </template>

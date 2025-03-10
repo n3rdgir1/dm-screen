@@ -1,9 +1,12 @@
 <template>
   <div>
-    <button v-if="mode === 'dm'" @click="toggleThinkingMode">{{ thinkingMode ? 'Stop Thinking Mode' : 'Start Thinking Mode' }}</button>
+    <div v-if="mode === 'dm'" class="header">
+      <h2>Thinking Mode</h2>
+      <button @click="toggleThinkingMode">{{ thinkingMode ? 'Stop Thinking Mode' : 'Start Thinking Mode' }}</button>
+    </div>
     <div v-if="thinkingMode" class="tips">
-      <h2>DM Is Thinking...</h2>
-      <p>{{ currentTip }}</p>
+      <h2>{{ currentTip }}</h2>
+      <p>DM Is Thinking...</p>
     </div>
   </div>
 </template>
@@ -51,6 +54,11 @@ export default {
 </script>
 
 <style scoped>
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 .tips {
   /* Add your styles here */
 }
