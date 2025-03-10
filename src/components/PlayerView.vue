@@ -8,16 +8,12 @@
 </template>
 
 <script>
+import { tips } from '../tips';
 export default {
   data() {
     return {
       thinkingMode: false,
-      tips: [
-        "Tip 1: Always check for traps.",
-        "Tip 2: Communicate with your party.",
-        "Tip 3: Keep track of your inventory.",
-        // Add more tips here
-      ],
+      tips: tips,
       currentTip: '',
       thinkingModeInterval: null,
     };
