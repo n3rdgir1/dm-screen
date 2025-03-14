@@ -40,17 +40,34 @@
               placeholder="Init modifier" 
               class="enemy-modifier-input"
             />
+            <input 
+              type="number" 
+              v-model="newEnemyCount" 
+              placeholder="Count" 
+              class="enemy-count-input"
+              min="1"
+            />
             <button @click="addEnemy" class="add-button">Add</button>
           </div>
           <div class="initiative-list">
             <div v-for="(enemy, index) in enemies" :key="'enemy-' + index" class="initiative-item">
-              <div class="initiative-name">{{ enemy.name }}</div>
+              <div class="initiative-name">
+                {{ enemy.name }}
+                <span v-if="enemy.count > 1" class="enemy-count">({{ enemy.count }})</span>
+              </div>
               <div class="initiative-controls">
                 <input 
                   type="number" 
                   v-model="enemy.initiative" 
                   class="initiative-input" 
                   placeholder="Init"
+                />
+                <input 
+                  type="number" 
+                  v-model="enemy.count" 
+                  class="count-input" 
+                  min="1"
+                  @input="saveInitiativeData"
                 />
                 <button @click="rollForEntity(enemy)" class="roll-button">Roll</button>
                 <button @click="removeEnemy(index)" class="remove-button">×</button>
@@ -99,6 +116,7 @@ export default {
       enemies: [],
       newEnemyName: '',
       newEnemyModifier: 0,
+      newEnemyCount: 1,
       initiativeData: {
         players: [],
         enemies: []
@@ -165,10 +183,12 @@ export default {
         this.enemies.push({
           name: this.newEnemyName.trim(),
           initiativeModifier: this.newEnemyModifier || 0,
-          initiative: null
+          initiative: null,
+          count: Math.max(1, parseInt(this.newEnemyCount) || 1)
         });
         this.newEnemyName = '';
         this.newEnemyModifier = 0;
+        this.newEnemyCount = 1;
         
         // Save after adding enemy
         this.saveInitiativeData();
@@ -195,7 +215,31 @@ export default {
     },
     rollForAll() {
       // DM only rolls for enemies, not players
-      this.enemies.forEach(enemy => this.rollForEntity(enemy));
+      // Group enemies by name to handle shared initiative
+      const enemyGroups = {};
+      
+      // First, organize enemies into groups by name
+      this.enemies.forEach(enemy => {
+        if (!enemyGroups[enemy.name]) {
+          enemyGroups[enemy.name] = [];
+        }
+        enemyGroups[enemy.name].push(enemy);
+      });
+      
+      // Roll once for each unique enemy name
+      Object.values(enemyGroups).forEach(group => {
+        if (group.length > 0) {
+          // Roll initiative for the first enemy in the group
+          const d20 = this.rollDice(20);
+          const modifier = group[0].initiativeModifier || 0;
+          const initiativeValue = d20 + modifier;
+          
+          // Apply the same initiative to all enemies with the same name
+          group.forEach(enemy => {
+            enemy.initiative = initiativeValue;
+          });
+        }
+      });
       
       // Save after rolling all
       if (this.mode === 'dm') {
@@ -317,8 +361,8 @@ h3 {
   padding: 6px;
 }
 
-.enemy-modifier-input {
-  width: 80px;
+.enemy-modifier-input, .enemy-count-input, .count-input {
+  width: 60px;
   padding: 6px;
   text-align: center;
 }
@@ -388,6 +432,12 @@ button {
 
 .enemy-item {
   border-left-color: #d9534f;
+}
+
+.enemy-count {
+  font-size: 0.85em;
+  color: #666;
+  font-weight: normal;
 }
 
 .initiative-value {
