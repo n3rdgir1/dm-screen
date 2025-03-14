@@ -17,6 +17,9 @@
       <div class="card">
         <NPCTracker />
       </div>
+      <div class="card">
+        <InitiativeTracker mode="dm" />
+      </div>
     </div>
   </div>
 </template>
@@ -26,6 +29,7 @@ import PlayerStats from './PlayerStats.vue';
 import NPCTracker from './NPCTracker.vue';
 import ImageUpload from './ImageUpload.vue';
 import ThinkingMode from './ThinkingMode.vue';
+import InitiativeTracker from './InitiativeTracker.vue';
 
 export default {
   components: {
@@ -33,10 +37,7 @@ export default {
     NPCTracker,
     ImageUpload,
     ThinkingMode,
-  },
-  data() {
-    return {
-    };
+    InitiativeTracker,
   },
   methods: {
     openPlayerView() {

@@ -2,6 +2,7 @@
   <div class="player-view">
     <ImageUpload mode="player"/>
     <ThinkingMode mode="player" />
+    <InitiativeTracker mode="player" />
   </div>
 </template>
 
@@ -9,10 +10,12 @@
 import { tips } from '../tips';
 import ImageUpload from './ImageUpload.vue';
 import ThinkingMode from './ThinkingMode.vue';
+import InitiativeTracker from './InitiativeTracker.vue';
 export default {
   components: {
     ImageUpload,
     ThinkingMode,
+    InitiativeTracker,
   },
   data() {
     return {
