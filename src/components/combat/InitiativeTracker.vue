@@ -1,19 +1,30 @@
 <template>
   <div class="initiative-tracker">
-    <div v-if="mode === 'dm'">
-      <button v-if="currentView === 'off'" @click="rollInitiative">Roll Initiative</button>
-      <button v-if="currentView === 'initiative'" @click="startCombat">Start Combat</button>
-      <button v-if="currentView === 'combat'" @click="endCombat">End Combat</button>
+    <div v-if="currentView === 'off' && mode === 'dm'">
+      <button @click="rollInitiative">Roll Initiative</button>
     </div>
-    <div v-if="mode === 'player'">
-      <div v-if="currentView === 'initiative'">Roll Initiative</div>
-      <div v-if="currentView === 'combat'">Combat Started</div>
-    </div>
+    <InitiativeMode 
+      v-if="currentView === 'initiative'" 
+      :mode="mode" 
+      @start-combat="startCombat" 
+    />
+    <CombatMode 
+      v-if="currentView === 'combat'" 
+      :mode="mode" 
+      @end-combat="endCombat" 
+    />
   </div>
 </template>
 
 <script>
+import InitiativeMode from './InitiativeMode.vue';
+import CombatMode from './CombatMode.vue';
+
 export default {
+  components: {
+    InitiativeMode,
+    CombatMode
+  },
   props: ['mode'],
   data() {
     return {

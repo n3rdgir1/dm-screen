@@ -10,7 +10,7 @@
 import { tips } from '../tips';
 import ImageUpload from './ImageUpload.vue';
 import ThinkingMode from './ThinkingMode.vue';
-import InitiativeTracker from './InitiativeTracker.vue';
+import InitiativeTracker from './combat/InitiativeTracker.vue';
 export default {
   components: {
     ImageUpload,

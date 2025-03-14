@@ -29,7 +29,7 @@ import PlayerStats from './PlayerStats.vue';
 import NPCTracker from './NPCTracker.vue';
 import ImageUpload from './ImageUpload.vue';
 import ThinkingMode from './ThinkingMode.vue';
-import InitiativeTracker from './InitiativeTracker.vue';
+import InitiativeTracker from './combat/InitiativeTracker.vue';
 
 export default {
   components: {
