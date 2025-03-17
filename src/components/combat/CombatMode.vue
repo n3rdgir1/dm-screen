@@ -402,19 +402,19 @@ export default {
       // Update the entity in the groupedInitiative structure
       const group = this.groupedInitiative[groupIndex];
       if (group && group.entities[entityIndex]) {
-        // Update the entity in the group
-        this.$set(group.entities, entityIndex, updatedEntity);
+        // Update the entity in the group - direct assignment works in Vue 3
+        group.entities[entityIndex] = updatedEntity;
         
         // Also update in the original arrays (players or enemies)
         if (updatedEntity.isPlayer) {
           const playerIndex = this.players.findIndex(p => p.name === updatedEntity.name);
           if (playerIndex !== -1) {
-            this.$set(this.players, playerIndex, updatedEntity);
+            this.players[playerIndex] = updatedEntity;
           }
         } else {
           const enemyIndex = this.enemies.findIndex(e => e.name === updatedEntity.name);
           if (enemyIndex !== -1) {
-            this.$set(this.enemies, enemyIndex, updatedEntity);
+            this.enemies[enemyIndex] = updatedEntity;
           }
         }
       }
