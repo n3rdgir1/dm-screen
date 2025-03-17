@@ -47,6 +47,13 @@
               class="enemy-count-input"
               min="1"
             />
+            <input 
+              type="number" 
+              v-model="newEnemyHP" 
+              placeholder="HP" 
+              class="enemy-hp-input"
+              min="1"
+            />
             <button @click="addEnemy" class="add-button">Add</button>
           </div>
           <div class="initiative-list">
@@ -69,6 +76,13 @@
                   min="1"
                   @input="saveInitiativeData"
                 />
+                <input 
+                  type="number" 
+                  v-model="enemy.maxHP" 
+                  class="enemy-hp-input" 
+                  placeholder="HP"
+                  @input="saveInitiativeData"
+                />
                 <button @click="rollForEntity(enemy)" class="roll-button">Roll</button>
                 <button @click="removeEnemy(index)" class="remove-button">×</button>
               </div>
@@ -86,11 +100,10 @@
           Start Combat
         </button>
       </div>
-
     </div>
 
     <div v-if="mode === 'player'">
-      <div class="initiative-order" v-if="playerInitiatives.length > 0">
+      <div class="initiative-order">
         <h3>Roll for Initiative</h3>
         <div class="order-list">
           <div 
@@ -115,8 +128,9 @@ export default {
       players: [],
       enemies: [],
       newEnemyName: '',
-      newEnemyModifier: 0,
-      newEnemyCount: 1,
+      newEnemyModifier: null,
+      newEnemyCount: null,
+      newEnemyHP: null,
       initiativeData: {
         players: [],
         enemies: []
@@ -174,7 +188,10 @@ export default {
         const playerData = JSON.parse(savedPlayers);
         this.players = playerData.map(player => ({
           ...player,
-          initiative: null
+          initiative: null,
+          currentHP: player.hp,
+          maxHP: player.hp,
+          tempHP: 0
         }));
       }
     },
@@ -184,11 +201,15 @@ export default {
           name: this.newEnemyName.trim(),
           initiativeModifier: this.newEnemyModifier || 0,
           initiative: null,
-          count: Math.max(1, parseInt(this.newEnemyCount) || 1)
+          count: Math.max(1, parseInt(this.newEnemyCount) || 1),
+          maxHP: this.newEnemyHP || null,
+          currentHP: this.newEnemyHP || null,
+          tempHP: 0
         });
         this.newEnemyName = '';
-        this.newEnemyModifier = 0;
-        this.newEnemyCount = 1;
+        this.newEnemyModifier = null;
+        this.newEnemyCount = null;
+        this.newEnemyHP = null;
         
         // Save after adding enemy
         this.saveInitiativeData();
@@ -361,7 +382,7 @@ h3 {
   padding: 6px;
 }
 
-.enemy-modifier-input, .enemy-count-input, .count-input {
+.enemy-modifier-input, .enemy-count-input, .enemy-hp-input, .count-input {
   width: 60px;
   padding: 6px;
   text-align: center;

@@ -287,9 +287,9 @@ export default {
         const index = this.individualEnemies[enemy.name].length + 1;
         this.individualEnemies[enemy.name].push({
           name: `${enemy.name} ${index}`,
-          currentHP: enemy.currentHP,
-          maxHP: enemy.maxHP,
-          tempHP: 0
+          currentHP: enemy.currentHP || enemy.maxHP,
+          maxHP: enemy.maxHP || null,
+          tempHP: enemy.tempHP || 0
         });
       }
       
@@ -436,8 +436,8 @@ export default {
             
             // Initialize HP values for players if not already set
             this.players.forEach(player => {
-              if (player.currentHP === undefined) player.currentHP = null;
-              if (player.maxHP === undefined) player.maxHP = null;
+              if (player.maxHP === undefined || player.maxHP === null) player.maxHP = null;
+              if (player.currentHP === undefined || player.currentHP === null) player.currentHP = player.maxHP;
               if (player.tempHP === undefined) player.tempHP = 0;
             });
           }
@@ -446,8 +446,8 @@ export default {
             
             // Initialize HP values for enemies if not already set
             this.enemies.forEach(enemy => {
-              if (enemy.currentHP === undefined) enemy.currentHP = null;
-              if (enemy.maxHP === undefined) enemy.maxHP = null;
+              if (enemy.maxHP === undefined || enemy.maxHP === null) enemy.maxHP = null;
+              if (enemy.currentHP === undefined || enemy.currentHP === null) enemy.currentHP = enemy.maxHP;
               if (enemy.tempHP === undefined) enemy.tempHP = 0;
               
               // Initialize individual enemies for groups
