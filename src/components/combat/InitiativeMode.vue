@@ -107,7 +107,16 @@
         <button @click="startCombat" class="start-combat-button" :disabled="!canStartCombat">
           Start Combat
         </button>
+        <button @click="closeInitiative" class="close-button">
+          Close
+        </button>
       </div>
+      
+      <!-- Encounter Manager Component -->
+      <EncounterManager 
+        :current-enemies="enemies" 
+        @load-encounter="loadEncounterEnemies"
+      />
     </div>
 
     <div v-if="mode === 'player'">
@@ -129,7 +138,12 @@
 </template>
 
 <script>
+import EncounterManager from './EncounterManager.vue';
+
 export default {
+  components: {
+    EncounterManager
+  },
   props: ['mode'],
   data() {
     return {
@@ -175,6 +189,11 @@ export default {
       // Save the initiative order before starting combat
       this.saveInitiativeData();
       this.$emit('start-combat');
+    },
+    
+    closeInitiative() {
+      // Emit close event to parent component
+      this.$emit('close-initiative');
     },
     
     saveInitiativeData() {
@@ -274,6 +293,22 @@ export default {
       if (this.mode === 'dm') {
         this.saveInitiativeData();
       }
+    },
+    
+    loadEncounterEnemies(enemies) {
+      // Clear existing enemies
+      this.enemies = [];
+      
+      // Add enemies from the loaded encounter
+      enemies.forEach(enemy => {
+        this.enemies.push({
+          ...enemy,
+          initiative: null // Reset initiative for new combat
+        });
+      });
+      
+      // Save the updated initiative data
+      this.saveInitiativeData();
     },
     
     loadInitiativeData() {
@@ -494,6 +529,10 @@ button {
 .start-combat-button:disabled {
   background-color: #999;
   cursor: not-allowed;
+}
+
+.close-button {
+  background-color: #d9534f;
 }
 
 .player-initiative {

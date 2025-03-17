@@ -4,12 +4,21 @@
       <h3>Initiative Tracker</h3>
       <div class="action-buttons">
         <button @click="rollInitiative" class="roll-initiative-button">Roll Initiative</button>
+        <button @click="manageEncounters" class="manage-encounters-button" v-if="!showEncounterManager">Manage Encounters</button>
+        <button @click="hideEncounterManager" class="hide-button" v-if="showEncounterManager">Hide Encounters</button>
       </div>
+      <EncounterManager 
+        v-if="showEncounterManager"
+        :current-enemies="[]"
+        @load-encounter="loadEncounterAndRoll"
+      />
     </div>
     <InitiativeMode 
       v-if="currentView === 'initiative'" 
       :mode="mode" 
-      @start-combat="startCombat" 
+      @start-combat="startCombat"
+      @close-initiative="endCombat"
+      ref="initiativeMode"
     />
     <CombatMode 
       v-if="currentView === 'combat'" 
@@ -22,22 +31,36 @@
 <script>
 import InitiativeMode from './InitiativeMode.vue';
 import CombatMode from './CombatMode.vue';
+import EncounterManager from './EncounterManager.vue';
 
 export default {
   components: {
     InitiativeMode,
-    CombatMode
+    CombatMode,
+    EncounterManager
   },
   props: ['mode'],
   data() {
     return {
       currentView: localStorage.getItem('initiativeTrackerView') || 'off',
+      showEncounterManager: false,
+      encounterToLoad: null
     };
   },
   methods: {
     rollInitiative() {
       this.currentView = 'initiative';
       this.updateInitiativeState();
+    },
+    manageEncounters() {
+      this.showEncounterManager = true;
+    },
+    hideEncounterManager() {
+      this.showEncounterManager = false;
+    },
+    loadEncounterAndRoll(enemies) {
+      this.encounterToLoad = enemies;
+      this.rollInitiative();
     },
     startCombat() {
       this.currentView = 'combat';
@@ -66,6 +89,18 @@ export default {
   },
   mounted() {
     window.addEventListener('storage', this.syncInitiativeState);
+    
+    // Pass the encounter to the initiative mode if needed
+    this.$nextTick(() => {
+      if (this.encounterToLoad && this.currentView === 'initiative') {
+        // Use $refs to access the InitiativeMode component
+        const initiativeMode = this.$refs.initiativeMode;
+        if (initiativeMode) {
+          initiativeMode.loadEncounterEnemies(this.encounterToLoad);
+          this.encounterToLoad = null;
+        }
+      }
+    });
   },
   beforeUnmount() {
     window.removeEventListener('storage', this.syncInitiativeState);
@@ -118,6 +153,21 @@ button {
 
 .roll-initiative-button {
   background-color: #5cb85c;
+  font-size: 1em;
+}
+
+.manage-encounters-button {
+  background-color: #4a6da7;
+  font-size: 1em;
+}
+
+.hide-button {
+  background-color: #f0ad4e;
+  font-size: 1em;
+}
+
+.close-button {
+  background-color: #d9534f;
   font-size: 1em;
 }
 </style>
