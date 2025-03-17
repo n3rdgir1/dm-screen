@@ -234,6 +234,10 @@ export default {
     nextTurn() {
       // Move to the next turn
       this.currentTurnIndex++;
+      // skip hidden entities
+      if (this.currentEntity && this.currentEntity.hiddenFromPlayers) {
+        this.currentTurnIndex++;
+      }
       
       // If we've reached the end of the initiative order, start a new round
       if (this.currentTurnIndex >= this.flattenedCombatants.length) {
@@ -437,6 +441,7 @@ export default {
     toggleEntityVisibility(entity, groupIndex, entityIndex) {
       // Update the entity in the group and save the updated data
       this.updateEntity(entity, groupIndex, entityIndex);
+      this.saveCombatData();
       // Save the updated initiative data to persist the visibility change
       this.saveInitiativeData();
     },
