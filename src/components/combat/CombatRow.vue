@@ -1,6 +1,6 @@
 <template>
   <div class="entity-row">
-    <div class="entity-name">
+    <div class="entity-name" :class="{ 'entity-defeated': localEntity.currentHP === 0 }">
       {{ localEntity.name }}
     </div>
     <div class="hp-tracking">
@@ -105,6 +105,9 @@ export default {
     },
 
     getHPColor() {
+      // If currentHP is exactly 0, return red
+      if (this.localEntity.currentHP === 0) return '#f44336'; // Red for 0 HP
+      
       if (!this.localEntity.currentHP || !this.localEntity.maxHP) return '#4caf50'; // Default green
       
       const percentage = (this.localEntity.currentHP / this.localEntity.maxHP) * 100;
@@ -165,6 +168,12 @@ export default {
   gap: 5px;
   font-weight: bold;
   flex: 1;
+}
+
+.entity-defeated {
+  color: #888; /* Grey color for defeated entities */
+  text-decoration: line-through;
+  opacity: 0.7;
 }
 
 .hp-tracking {
