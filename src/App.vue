@@ -11,5 +11,25 @@ export default {
 </script>
 
 <style>
-/* Add your styles here */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body, html {
+  height: 100%;
+  width: 100%;
+  font-family: Arial, sans-serif;
+  overflow-x: hidden;
+}
+
+#app {
+  height: 100%;
+  width: 100%;
+}
+
+button {
+  cursor: pointer;
+}
 </style>

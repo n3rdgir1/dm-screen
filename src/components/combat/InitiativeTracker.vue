@@ -1,7 +1,10 @@
 <template>
   <div class="initiative-tracker">
     <div v-if="currentView === 'off' && mode === 'dm'">
-      <button @click="rollInitiative">Roll Initiative</button>
+      <h3>Initiative Tracker</h3>
+      <div class="action-buttons">
+        <button @click="rollInitiative" class="roll-initiative-button">Roll Initiative</button>
+      </div>
     </div>
     <InitiativeMode 
       v-if="currentView === 'initiative'" 
@@ -74,7 +77,47 @@ export default {
 .initiative-tracker {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 8px;
+  width: 100%;
+  gap: 16px;
+}
+
+.initiative-start-container {
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 16px;
+  background-color: #f9f9f9;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+h3 {
+  margin: 0;
+  color: #333;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 8px;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #4a6da7;
+  color: white;
+  font-weight: bold;
+}
+
+.roll-initiative-button {
+  background-color: #5cb85c;
+  font-size: 1em;
 }
 </style>

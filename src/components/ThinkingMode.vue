@@ -1,13 +1,13 @@
 <template>
-  <div>
-    <div v-if="mode === 'dm'" class="header">
-      <h2>Thinking Mode</h2>
-      <button @click="toggleThinkingMode">{{ thinkingMode ? 'Stop Thinking Mode' : 'Start Thinking Mode' }}</button>
-    </div>
-    <div v-if="thinkingMode" class="tips">
-      <h2>{{ currentTip }}</h2>
-      <p>DM Is Thinking...</p>
-    </div>
+  <!-- DM View -->
+  <button v-if="mode === 'dm'" @click="toggleThinkingMode" :class="thinkingMode ? 'stop-thinking-button' : 'start-thinking-button'">
+    {{ thinkingMode ? 'Stop Thinking Mode' : 'Start Thinking Mode' }}
+  </button>
+  
+  <!-- Thinking Section (visible in both DM and player views) -->
+  <div v-if="thinkingMode && mode === 'player'" class="thinking-section">
+    <h3 class="tip-title">{{ currentTip }}</h3>
+    <p class="thinking-status">DM Is Thinking...</p>
   </div>
 </template>
 
@@ -54,12 +54,72 @@ export default {
 </script>
 
 <style scoped>
-.header {
+
+.thinking-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  width: 100%;
 }
-.tips {
-  /* Add your styles here */
+
+.thinking-section {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 16px;
+  background-color: #f9f9f9;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+h3 {
+  margin: 0;
+  color: #333;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 8px;
+}
+
+.tip-title {
+  font-size: 1.2em;
+  margin-top: 0;
+  border-bottom: none;
+}
+
+.thinking-status {
+  font-style: italic;
+  color: #888;
+  padding: 8px;
+  text-align: center;
+  font-size: 1.1em;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #4a6da7;
+  color: white;
+  font-weight: bold;
+}
+
+.start-thinking-button {
+  background-color: #5cb85c;
+  font-size: 1em;
+}
+
+.stop-thinking-button {
+  background-color: #d9534f;
+  font-size: 1em;
+}
+
+.player-thinking-placeholder {
+  min-height: 10px; /* Minimal height when not active */
 }
 </style>
