@@ -299,7 +299,8 @@ export default {
           name: `${enemy.name} ${index}`,
           currentHP: enemy.currentHP || enemy.maxHP,
           maxHP: enemy.maxHP || null,
-          tempHP: enemy.tempHP || 0
+          tempHP: enemy.tempHP || 0,
+          referenceUrl: enemy.referenceUrl || ''
         });
       }
       
@@ -319,7 +320,7 @@ export default {
         this.individualEnemies[enemy.name][index].name = `${enemy.name} ${index + 1}`;
       }
       
-      return this.individualEnemies[enemy.name][index] || { name: `${enemy.name} ${index + 1}`, currentHP: null, maxHP: null, tempHP: 0 };
+      return this.individualEnemies[enemy.name][index] || { name: `${enemy.name} ${index + 1}`, currentHP: null, maxHP: null, tempHP: 0, referenceUrl: enemy.referenceUrl || '' };
     },
     
     updateIndividualEnemyHP(enemy, index, updatedEntity) {

@@ -54,6 +54,12 @@
               class="enemy-hp-input"
               min="1"
             />
+            <input 
+              type="text" 
+              v-model="newEnemyReference" 
+              placeholder="Reference URL" 
+              class="enemy-reference-input"
+            />
             <button @click="addEnemy" class="add-button">Add</button>
           </div>
           <div class="initiative-list">
@@ -61,6 +67,9 @@
               <div class="initiative-name">
                 {{ enemy.name }}
                 <span v-if="enemy.count > 1" class="enemy-count">({{ enemy.count }})</span>
+                <a v-if="enemy.referenceUrl" :href="enemy.referenceUrl" target="_blank" class="reference-link" title="Open reference sheet">
+                  <span class="reference-icon">📋</span>
+                </a>
               </div>
               <div class="initiative-controls">
                 <input 
@@ -153,6 +162,7 @@ export default {
       newEnemyModifier: null,
       newEnemyCount: null,
       newEnemyHP: null,
+      newEnemyReference: '',
       initiativeData: {
         players: [],
         enemies: []
@@ -231,12 +241,14 @@ export default {
           count: Math.max(1, parseInt(this.newEnemyCount) || 1),
           maxHP: this.newEnemyHP || null,
           currentHP: this.newEnemyHP || null,
-          tempHP: 0
+          tempHP: 0,
+          referenceUrl: this.newEnemyReference || ''
         });
         this.newEnemyName = '';
         this.newEnemyModifier = null;
         this.newEnemyCount = null;
         this.newEnemyHP = null;
+        this.newEnemyReference = '';
         
         // Save after adding enemy
         this.saveInitiativeData();
@@ -425,7 +437,7 @@ h3 {
   padding: 6px;
 }
 
-.enemy-modifier-input, .enemy-count-input, .enemy-hp-input, .count-input {
+.enemy-modifier-input, .enemy-count-input, .enemy-hp-input, .enemy-reference-input, .count-input {
   width: 60px;
   padding: 6px;
   text-align: center;
@@ -502,6 +514,18 @@ button {
   font-size: 0.85em;
   color: #666;
   font-weight: normal;
+}
+
+.reference-link {
+  margin-left: 8px;
+  color: #4a6da7;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.reference-icon {
+  font-size: 1.1em;
 }
 
 .initiative-value {

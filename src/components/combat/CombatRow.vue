@@ -2,6 +2,9 @@
   <div class="entity-row">
     <div class="entity-name" :class="{ 'entity-defeated': localEntity.currentHP === 0 }">
       {{ localEntity.name }}
+      <a v-if="localEntity.referenceUrl" :href="localEntity.referenceUrl" target="_blank" class="reference-link" title="Open reference sheet">
+        <span class="reference-icon">📋</span>
+      </a>
     </div>
     <div class="hp-tracking">
       <div class="hp-inputs">
@@ -174,6 +177,18 @@ export default {
   color: #888; /* Grey color for defeated entities */
   text-decoration: line-through;
   opacity: 0.7;
+}
+
+.reference-link {
+  margin-left: 8px;
+  color: #4a6da7;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.reference-icon {
+  font-size: 1.1em;
 }
 
 .hp-tracking {
