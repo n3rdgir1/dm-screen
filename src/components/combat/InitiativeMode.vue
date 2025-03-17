@@ -83,6 +83,14 @@
                   placeholder="HP"
                   @input="saveInitiativeData"
                 />
+                <div class="hide-control">
+                  <input 
+                    type="checkbox" 
+                    v-model="enemy.hiddenFromPlayers" 
+                    @change="saveInitiativeData"
+                  />
+                  <label>Hidden</label>
+                </div>
                 <button @click="rollForEntity(enemy)" class="roll-button">Roll</button>
                 <button @click="removeEnemy(index)" class="remove-button">×</button>
               </div>

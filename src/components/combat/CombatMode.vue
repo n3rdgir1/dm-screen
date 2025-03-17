@@ -24,6 +24,12 @@
                  :class="['order-item', entity.isPlayer ? 'player-item' : 'enemy-item', 
                           isCurrentTurn(entity, groupIndex, entityIndex) ? 'current-turn' : '']">
               <!-- For players or enemies with count=1 -->
+              <div class="hidden-toggle" v-if="!entity.isPlayer">
+                <label for="hidden-toggle-{{ groupIndex }}-{{ entityIndex }}" class="hidden-toggle">Hide from players</label>
+                <input type="checkbox" :id="'hidden-toggle-' + groupIndex + '-' + entityIndex" 
+                       v-model="entity.hiddenFromPlayers" 
+                       @change="toggleEntityVisibility(entity, groupIndex, entityIndex)" />
+              </div>
               <CombatRow 
                 v-if="entity.isPlayer || entity.count <= 1" 
                 :entity="entity" 
@@ -186,7 +192,7 @@ export default {
           name: 'Enemy', // Replace enemy name with generic 'Enemy'
           isPlayer: false
         }))
-      ].filter(entity => entity.initiative !== null && entity.initiative !== undefined);
+      ].filter(entity => entity.initiative !== null && entity.initiative !== undefined && !entity.hiddenFromPlayers);
       
       // Sort by initiative (high to low)
       const sorted = allCombatants.sort((a, b) => b.initiative - a.initiative);
@@ -336,13 +342,15 @@ export default {
           name: player.name,
           currentHP: player.currentHP,
           maxHP: player.maxHP,
-          tempHP: player.tempHP
+          tempHP: player.tempHP,
+          hiddenFromPlayers: player.hiddenFromPlayers || false
         })),
         enemies: this.enemies.map(enemy => ({
           name: enemy.name,
           currentHP: enemy.currentHP,
           maxHP: enemy.maxHP,
-          tempHP: enemy.tempHP
+          tempHP: enemy.tempHP,
+          hiddenFromPlayers: enemy.hiddenFromPlayers || false
         })),
         individualEnemies: this.individualEnemies,
         timestamp: Date.now()
@@ -365,6 +373,9 @@ export default {
                 player.currentHP = savedPlayer.currentHP;
                 player.maxHP = savedPlayer.maxHP;
                 player.tempHP = savedPlayer.tempHP || 0;
+                if (savedPlayer.hiddenFromPlayers !== undefined) {
+                  player.hiddenFromPlayers = savedPlayer.hiddenFromPlayers;
+                }
               }
             });
           }
@@ -377,6 +388,9 @@ export default {
                 enemy.currentHP = savedEnemy.currentHP;
                 enemy.maxHP = savedEnemy.maxHP;
                 enemy.tempHP = savedEnemy.tempHP || 0;
+                if (savedEnemy.hiddenFromPlayers !== undefined) {
+                  enemy.hiddenFromPlayers = savedEnemy.hiddenFromPlayers;
+                }
               }
             });
           }
@@ -420,6 +434,13 @@ export default {
       }
     },
     
+    toggleEntityVisibility(entity, groupIndex, entityIndex) {
+      // Update the entity in the group and save the updated data
+      this.updateEntity(entity, groupIndex, entityIndex);
+      // Save the updated initiative data to persist the visibility change
+      this.saveInitiativeData();
+    },
+    
     endCombat() {
       // Clear combat data when ending combat
       localStorage.removeItem('combatData');
@@ -439,6 +460,7 @@ export default {
               if (player.maxHP === undefined || player.maxHP === null) player.maxHP = null;
               if (player.currentHP === undefined || player.currentHP === null) player.currentHP = player.maxHP;
               if (player.tempHP === undefined) player.tempHP = 0;
+              if (player.hiddenFromPlayers === undefined) player.hiddenFromPlayers = false;
             });
           }
           if (data.enemies) {
@@ -449,6 +471,7 @@ export default {
               if (enemy.maxHP === undefined || enemy.maxHP === null) enemy.maxHP = null;
               if (enemy.currentHP === undefined || enemy.currentHP === null) enemy.currentHP = enemy.maxHP;
               if (enemy.tempHP === undefined) enemy.tempHP = 0;
+              if (enemy.hiddenFromPlayers === undefined) enemy.hiddenFromPlayers = false;
               
               // Initialize individual enemies for groups
               if (enemy.count > 1) {
@@ -464,6 +487,21 @@ export default {
       // Load HP data if available
       this.loadHPData();
     },
+    
+    saveInitiativeData() {
+      const data = {
+        players: this.players,
+        enemies: this.enemies,
+        timestamp: Date.now()
+      };
+      localStorage.setItem('initiativeData', JSON.stringify(data));
+      // Dispatch event for other tabs/views
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: 'initiativeData',
+        newValue: JSON.stringify(data)
+      }));
+    },
+    
     syncInitiativeData(event) {
       if (event.key === 'initiativeData') {
         this.loadInitiativeData();
@@ -488,6 +526,22 @@ export default {
 </script>
 
 <style scoped>
+.enemy-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+  padding: 4px 8px;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+
+.hidden-toggle {
+  margin-right: 8px;
+  font-size: 0.9em;
+  color: #555;
+}
+
 .combat-mode {
   display: flex;
   flex-direction: column;
