@@ -42,6 +42,9 @@ export default {
     },
     endCombat() {
       this.currentView = 'off';
+
+      localStorage.removeItem('individualEnemies');
+      localStorage.removeItem('initiativeData');
       this.updateInitiativeState();
     },
     updateInitiativeState() {

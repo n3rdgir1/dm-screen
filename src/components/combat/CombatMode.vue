@@ -24,97 +24,22 @@
                  :class="['order-item', entity.isPlayer ? 'player-item' : 'enemy-item', 
                           isCurrentTurn(entity, groupIndex, entityIndex) ? 'current-turn' : '']">
               <!-- For players or enemies with count=1 -->
-              <div v-if="entity.isPlayer || entity.count <= 1" class="entity-row">
-                <div class="entity-name">
-                  {{ entity.name }}
-                </div>
-                <div class="hp-tracking">
-                  <div class="hp-inputs">
-                    <input 
-                      type="number" 
-                      v-model="entity.currentHP" 
-                      class="hp-input current-hp" 
-                      placeholder="HP"
-                      @input="updateEntityHP(entity)"
-                    />
-                    <span class="hp-separator">/</span>
-                    <input 
-                      type="number" 
-                      v-model="entity.maxHP" 
-                      class="hp-input max-hp" 
-                      placeholder="Max"
-                      @input="updateEntityHP(entity)"
-                    />
-                    <input 
-                      type="number" 
-                      v-model="entity.tempHP" 
-                      class="hp-input temp-hp" 
-                      placeholder="Temp"
-                      @input="updateEntityHP(entity)"
-                    />
-                    <input 
-                      type="number" 
-                      class="hp-input hp-modify" 
-                      placeholder="±HP"
-                      @change="handleHPChange(entity, $event.target.value)"
-                      @blur="$event.target.value = ''"
-                    />
-                  </div>
-                  <div class="hp-bar-container">
-                    <div 
-                      class="hp-bar" 
-                      :style="{ width: calculateHPPercentage(entity) + '%', backgroundColor: getHPColor(entity) }"
-                    ></div>
-                  </div>
-                </div>
-              </div>
+              <CombatRow 
+                v-if="entity.isPlayer || entity.count <= 1" 
+                :entity="entity" 
+                @update:entity="updateEntity($event, groupIndex, entityIndex)" 
+                @initialize-individual-enemies="initializeIndividualEnemies" 
+                @save-hp-data="saveHPData" 
+              />
               
               <!-- For enemies with count > 1, show individual entries -->
               <div v-else class="enemy-group">
-                <div v-for="n in entity.count" 
+                <CombatRow v-for="n in entity.count" 
                      :key="'enemy-' + entityIndex + '-' + n"
-                     class="entity-row">
-                  <div class="entity-name">{{ entity.name }} {{ n }}</div>
-                  <div class="hp-tracking">
-                    <div class="hp-inputs">
-                      <input 
-                        type="number" 
-                        v-model="getIndividualEnemy(entity, n - 1).currentHP" 
-                        class="hp-input current-hp" 
-                        placeholder="HP"
-                        @input="updateIndividualEnemyHP(entity, n - 1)"
-                      />
-                      <span class="hp-separator">/</span>
-                      <input 
-                        type="number" 
-                        v-model="getIndividualEnemy(entity, n - 1).maxHP" 
-                        class="hp-input max-hp" 
-                        placeholder="Max"
-                        @input="updateIndividualEnemyHP(entity, n - 1)"
-                      />
-                      <input 
-                        type="number" 
-                        v-model="getIndividualEnemy(entity, n - 1).tempHP" 
-                        class="hp-input temp-hp" 
-                        placeholder="Temp"
-                        @input="updateIndividualEnemyHP(entity, n - 1)"
-                      />
-                      <input 
-                        type="number" 
-                        class="hp-input hp-modify" 
-                        placeholder="±HP"
-                        @change="handleHPChange(getIndividualEnemy(entity, n - 1), $event.target.value)"
-                        @blur="$event.target.value = ''"
-                      />
-                    </div>
-                    <div class="hp-bar-container">
-                      <div 
-                        class="hp-bar" 
-                        :style="{ width: calculateHPPercentage(getIndividualEnemy(entity, n - 1)) + '%', backgroundColor: getHPColor(getIndividualEnemy(entity, n - 1)) }"
-                      ></div>
-                    </div>
-                  </div>
-                </div>
+                     :entity="getIndividualEnemy(entity, n - 1)" 
+                     @update:entity="updatedEntity => updateIndividualEnemyHP(entity, n - 1, updatedEntity)" 
+                     @save-hp-data="saveHPData" 
+                   />
               </div>
             </div>
           </template>
@@ -159,8 +84,12 @@
 </template>
 
 <script>
+import CombatRow from './CombatRow.vue';
 export default {
   props: ['mode'],
+  components: {
+    CombatRow
+  },
   data() {
     return {
       players: [],
@@ -284,39 +213,7 @@ export default {
     }
   },
   methods: {
-    modifyHP(entity, amount) {
-      if (!entity || entity.currentHP === null || entity.maxHP === null) return;
-      
-      // Healing
-      if (amount > 0) {
-        entity.currentHP = Math.min(entity.maxHP, entity.currentHP + amount);
-      }
-      // Damage
-      else if (amount < 0) {
-        const damage = Math.abs(amount);
-        // Apply damage to temp HP first
-        if (entity.tempHP > 0) {
-          if (entity.tempHP >= damage) {
-            entity.tempHP -= damage;
-          } else {
-            const remainingDamage = damage - entity.tempHP;
-            entity.tempHP = 0;
-            entity.currentHP = Math.max(0, entity.currentHP - remainingDamage);
-          }
-        } else {
-          entity.currentHP = Math.max(0, entity.currentHP - damage);
-        }
-      }
-      
-      this.updateEntityHP(entity);
-    },
 
-    handleHPChange(entity, amount) {
-      const value = parseInt(amount);
-      if (!isNaN(value)) {
-        this.modifyHP(entity, value);
-      }
-    },
     isCurrentTurn(entity, groupIndex, entityIndex) {
       // Find the absolute index of this entity in the flattened list
       let absoluteIndex = 0;
@@ -387,7 +284,9 @@ export default {
       
       // Ensure we have the right number of individual enemies
       while (this.individualEnemies[enemy.name].length < enemy.count) {
+        const index = this.individualEnemies[enemy.name].length + 1;
         this.individualEnemies[enemy.name].push({
+          name: `${enemy.name} ${index}`,
           currentHP: enemy.currentHP,
           maxHP: enemy.maxHP,
           tempHP: 0
@@ -405,64 +304,30 @@ export default {
         this.initializeIndividualEnemies(enemy);
       }
       
-      return this.individualEnemies[enemy.name][index] || { currentHP: null, maxHP: null, tempHP: 0 };
+      // If the individual enemy exists but doesn't have a name, add it
+      if (this.individualEnemies[enemy.name][index] && !this.individualEnemies[enemy.name][index].name) {
+        this.individualEnemies[enemy.name][index].name = `${enemy.name} ${index + 1}`;
+      }
+      
+      return this.individualEnemies[enemy.name][index] || { name: `${enemy.name} ${index + 1}`, currentHP: null, maxHP: null, tempHP: 0 };
     },
     
-    updateEntityHP(entity) {
-      // Ensure values are numbers or null
-      entity.currentHP = entity.currentHP !== null ? Number(entity.currentHP) : null;
-      entity.maxHP = entity.maxHP !== null ? Number(entity.maxHP) : null;
-      entity.tempHP = entity.tempHP !== null ? Number(entity.tempHP) : 0;
-      
-      // Ensure currentHP doesn't exceed maxHP
-      if (entity.currentHP !== null && entity.maxHP !== null && entity.currentHP > entity.maxHP) {
-        entity.currentHP = entity.maxHP;
-      }
-
-      // Ensure HP values don't go below 0
-      if (entity.currentHP !== null && entity.currentHP < 0) entity.currentHP = 0;
-      if (entity.maxHP !== null && entity.maxHP < 0) entity.maxHP = 0;
-      if (entity.tempHP < 0) entity.tempHP = 0;
-      
-      // For enemies with count > 1, update all individual enemies
-      if (!entity.isPlayer && entity.count > 1) {
-        this.initializeIndividualEnemies(entity);
-        
-        // Update all individual enemies with the new values
-        this.individualEnemies[entity.name].forEach(individual => {
-          if (entity.maxHP !== null) individual.maxHP = entity.maxHP;
-          if (entity.currentHP !== null) individual.currentHP = entity.currentHP;
-        });
-      }
-      
-      this.saveHPData();
-    },
-
-    updateIndividualEnemyHP(enemy, index) {
+    updateIndividualEnemyHP(enemy, index, updatedEntity) {
       const individual = this.getIndividualEnemy(enemy, index);
       
-      // Ensure values are numbers or null
-      individual.currentHP = individual.currentHP !== null ? Number(individual.currentHP) : null;
-      individual.maxHP = individual.maxHP !== null ? Number(individual.maxHP) : null;
+      if (updatedEntity) {
+        // If we received an updated entity from CombatRow, use its values
+        individual.currentHP = updatedEntity.currentHP;
+        individual.maxHP = updatedEntity.maxHP;
+        individual.tempHP = updatedEntity.tempHP || 0;
+      } else {
+        // Otherwise, ensure values are numbers or null
+        individual.currentHP = individual.currentHP !== null ? Number(individual.currentHP) : null;
+        individual.maxHP = individual.maxHP !== null ? Number(individual.maxHP) : null;
+        individual.tempHP = individual.tempHP !== null ? Number(individual.tempHP) : 0;
+      }
       
       this.saveHPData();
-    },
-    
-    calculateHPPercentage(entity) {
-      if (!entity.currentHP || !entity.maxHP) return 100;
-      
-      const percentage = (entity.currentHP / entity.maxHP) * 100;
-      return Math.max(0, Math.min(100, percentage)); // Clamp between 0 and 100
-    },
-    
-    getHPColor(entity) {
-      if (!entity.currentHP || !entity.maxHP) return '#4caf50'; // Default green
-      
-      const percentage = (entity.currentHP / entity.maxHP) * 100;
-      
-      if (percentage > 50) return '#4caf50'; // Green
-      if (percentage > 25) return '#ff9800'; // Orange
-      return '#f44336'; // Red
     },
     
     saveHPData() {
@@ -530,6 +395,28 @@ export default {
     syncHPData(event) {
       if (event.key === 'combatHPData') {
         this.loadHPData();
+      }
+    },
+    
+    updateEntity(updatedEntity, groupIndex, entityIndex) {
+      // Update the entity in the groupedInitiative structure
+      const group = this.groupedInitiative[groupIndex];
+      if (group && group.entities[entityIndex]) {
+        // Update the entity in the group
+        this.$set(group.entities, entityIndex, updatedEntity);
+        
+        // Also update in the original arrays (players or enemies)
+        if (updatedEntity.isPlayer) {
+          const playerIndex = this.players.findIndex(p => p.name === updatedEntity.name);
+          if (playerIndex !== -1) {
+            this.$set(this.players, playerIndex, updatedEntity);
+          }
+        } else {
+          const enemyIndex = this.enemies.findIndex(e => e.name === updatedEntity.name);
+          if (enemyIndex !== -1) {
+            this.$set(this.enemies, enemyIndex, updatedEntity);
+          }
+        }
       }
     },
     
@@ -676,127 +563,6 @@ export default {
   min-width: 30px;
   margin-right: 12px;
   text-align: center;
-}
-
-.enemy-group {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-}
-
-.enemy-group-name {
-  font-weight: bold;
-  margin-bottom: 4px;
-}
-
-.individual-enemies {
-  display: flex;
-  flex-direction: column;
-  margin-left: 16px;
-}
-
-.individual-enemy {
-  padding: 4px 0;
-  border-left: 2px solid #eee;
-  padding-left: 8px;
-  margin-top: 2px;
-  font-size: 0.9em;
-  color: #555;
-}
-
-.entity-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
-
-.entity-name {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-weight: bold;
-  flex: 1;
-}
-
-.hp-tracking {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  width: 250px;
-}
-
-.hp-inputs {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  flex-wrap: wrap;
-}
-.hp-modify {
-  width: 60px;
-  background-color: #2c3e50;
-  color: white;
-  border: 1px solid #34495e;
-  text-align: center;
-  margin-left: 4px;
-}
-
-.hp-input {
-  width: 45px;
-  padding: 2px 4px;
-  text-align: center;
-  border: 1px solid #ddd;
-  border-radius: 3px;
-}
-
-.current-hp {
-  font-weight: bold;
-}
-
-.temp-hp {
-  color: #2196f3;
-  width: 40px;
-}
-
-.hp-separator {
-  color: #999;
-}
-
-.hp-bar-container {
-  height: 4px;
-  background-color: #eee;
-  border-radius: 2px;
-  overflow: hidden;
-  width: 100%;
-}
-
-.hp-bar {
-  height: 100%;
-  background-color: #4caf50;
-  transition: width 0.3s ease, background-color 0.3s ease;
-}
-
-.individual-enemy-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
-
-.individual-enemy-name {
-  flex: 1;
-}
-
-.individual-hp-tracking {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.enemy-count {
-  font-size: 0.85em;
-  color: #666;
-  font-weight: normal;
 }
 
 .next-turn-button {
