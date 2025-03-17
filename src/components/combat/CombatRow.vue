@@ -180,7 +180,7 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  width: 250px;
+  width: 200px;
 }
 
 .hp-inputs {
