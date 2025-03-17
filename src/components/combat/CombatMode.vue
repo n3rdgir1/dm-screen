@@ -52,6 +52,13 @@
                       placeholder="Temp"
                       @input="updateEntityHP(entity)"
                     />
+                    <input 
+                      type="number" 
+                      class="hp-input hp-modify" 
+                      placeholder="±HP"
+                      @change="handleHPChange(entity, $event.target.value)"
+                      @blur="$event.target.value = ''"
+                    />
                   </div>
                   <div class="hp-bar-container">
                     <div 
@@ -91,6 +98,13 @@
                         class="hp-input temp-hp" 
                         placeholder="Temp"
                         @input="updateIndividualEnemyHP(entity, n - 1)"
+                      />
+                      <input 
+                        type="number" 
+                        class="hp-input hp-modify" 
+                        placeholder="±HP"
+                        @change="handleHPChange(getIndividualEnemy(entity, n - 1), $event.target.value)"
+                        @blur="$event.target.value = ''"
                       />
                     </div>
                     <div class="hp-bar-container">
@@ -270,6 +284,39 @@ export default {
     }
   },
   methods: {
+    modifyHP(entity, amount) {
+      if (!entity || entity.currentHP === null || entity.maxHP === null) return;
+      
+      // Healing
+      if (amount > 0) {
+        entity.currentHP = Math.min(entity.maxHP, entity.currentHP + amount);
+      }
+      // Damage
+      else if (amount < 0) {
+        const damage = Math.abs(amount);
+        // Apply damage to temp HP first
+        if (entity.tempHP > 0) {
+          if (entity.tempHP >= damage) {
+            entity.tempHP -= damage;
+          } else {
+            const remainingDamage = damage - entity.tempHP;
+            entity.tempHP = 0;
+            entity.currentHP = Math.max(0, entity.currentHP - remainingDamage);
+          }
+        } else {
+          entity.currentHP = Math.max(0, entity.currentHP - damage);
+        }
+      }
+      
+      this.updateEntityHP(entity);
+    },
+
+    handleHPChange(entity, amount) {
+      const value = parseInt(amount);
+      if (!isNaN(value)) {
+        this.modifyHP(entity, value);
+      }
+    },
     isCurrentTurn(entity, groupIndex, entityIndex) {
       // Find the absolute index of this entity in the flattened list
       let absoluteIndex = 0;
@@ -367,6 +414,16 @@ export default {
       entity.maxHP = entity.maxHP !== null ? Number(entity.maxHP) : null;
       entity.tempHP = entity.tempHP !== null ? Number(entity.tempHP) : 0;
       
+      // Ensure currentHP doesn't exceed maxHP
+      if (entity.currentHP !== null && entity.maxHP !== null && entity.currentHP > entity.maxHP) {
+        entity.currentHP = entity.maxHP;
+      }
+
+      // Ensure HP values don't go below 0
+      if (entity.currentHP !== null && entity.currentHP < 0) entity.currentHP = 0;
+      if (entity.maxHP !== null && entity.maxHP < 0) entity.maxHP = 0;
+      if (entity.tempHP < 0) entity.tempHP = 0;
+      
       // For enemies with count > 1, update all individual enemies
       if (!entity.isPlayer && entity.count > 1) {
         this.initializeIndividualEnemies(entity);
@@ -380,7 +437,7 @@ export default {
       
       this.saveHPData();
     },
-    
+
     updateIndividualEnemyHP(enemy, index) {
       const individual = this.getIndividualEnemy(enemy, index);
       
@@ -666,13 +723,22 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  width: 200px;
+  width: 250px;
 }
 
 .hp-inputs {
   display: flex;
   align-items: center;
   gap: 4px;
+  flex-wrap: wrap;
+}
+.hp-modify {
+  width: 60px;
+  background-color: #2c3e50;
+  color: white;
+  border: 1px solid #34495e;
+  text-align: center;
+  margin-left: 4px;
 }
 
 .hp-input {
