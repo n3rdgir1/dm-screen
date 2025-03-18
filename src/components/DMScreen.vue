@@ -4,7 +4,15 @@
       <h1>DM Screen</h1>
       <div class="header-buttons">
         <ThinkingMode mode="dm" />
-        <button @click="openPlayerView" class="player-view-button">Open Player View</button>
+        <div class="dropdown">
+          <button class="dropdown-toggle" @click.stop="toggleDropdown">
+            <span>Menu</span>
+            <span class="dropdown-icon">▼</span>
+          </button>
+          <div class="dropdown-menu" v-show="dropdownOpen" @click.stop>
+            <a href="#" @click.prevent="openPlayerView">Open Player View</a>
+          </div>
+        </div>
       </div>
     </div>
     
@@ -81,11 +89,24 @@ export default {
   data() {
     return {
       activeTab: 'dashboard',
+      dropdownOpen: false,
     };
   },
   methods: {
     openPlayerView() {
       window.open('/player-view', '_blank');
+      this.dropdownOpen = false;
+    },
+    toggleDropdown(event) {
+      // Prevent the click from propagating to the document
+      if (event) event.stopPropagation();
+      this.dropdownOpen = !this.dropdownOpen;
+    },
+    handleClickOutside(event) {
+      const dropdown = this.$el.querySelector('.dropdown');
+      if (dropdown && !dropdown.contains(event.target) && this.dropdownOpen) {
+        this.dropdownOpen = false;
+      }
     },
     switchTab(tab) {
       this.activeTab = tab;
@@ -99,6 +120,14 @@ export default {
     if (savedTab) {
       this.activeTab = savedTab;
     }
+    
+    // Add click outside listener for dropdown
+    document.addEventListener('click', this.handleClickOutside);
+  },
+  
+  beforeUnmount() {
+    // Remove click outside listener when component is destroyed
+    document.removeEventListener('click', this.handleClickOutside);
   },
 };
 </script>
@@ -150,8 +179,55 @@ export default {
   justify-content: center;
 }
 
-.player-view-button {
-  background-color: #5cb85c;
+/* Dropdown Menu Styling */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-toggle {
+  background-color: #4a6da7;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dropdown-toggle:hover {
+  background-color: #3c5a8a;
+}
+
+.dropdown-icon {
+  font-size: 0.8em;
+}
+
+.dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background-color: white;
+  min-width: 180px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  z-index: 1001;
+  margin-top: 4px;
+}
+
+.dropdown-menu a {
+  color: #333;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+  transition: background-color 0.2s;
+}
+
+.dropdown-menu a:hover {
+  background-color: #f5f5f5;
+  color: #4a6da7;
 }
 
 .content {
