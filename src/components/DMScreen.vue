@@ -11,6 +11,8 @@
           </button>
           <div class="dropdown-menu" v-show="dropdownOpen" @click.stop>
             <a href="#" @click.prevent="openPlayerView">Open Player View</a>
+            <a href="#" @click.prevent="exportData">Export Data</a>
+            <a href="#" @click.prevent="importData">Import Data</a>
           </div>
         </div>
       </div>
@@ -95,6 +97,89 @@ export default {
   methods: {
     openPlayerView() {
       window.open('/player-view', '_blank');
+      this.dropdownOpen = false;
+    },
+    exportData() {
+      // Collect all data from localStorage
+      const exportData = {};
+      
+      // Get all keys from localStorage
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        try {
+          // Try to parse as JSON first
+          const value = localStorage.getItem(key);
+          try {
+            exportData[key] = JSON.parse(value);
+          } catch (e) {
+            // If not valid JSON, store as string
+            exportData[key] = value;
+          }
+        } catch (e) {
+          console.error(`Error exporting key ${key}:`, e);
+        }
+      }
+      
+      // Create a Blob with the data
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      
+      // Create a link and trigger download
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `dm-screen-data-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      
+      // Clean up
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 100);
+      
+      this.dropdownOpen = false;
+    },
+    importData() {
+      // Create a file input element
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = '.json';
+      
+      fileInput.onchange = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const importedData = JSON.parse(e.target.result);
+            
+            // Confirm before importing
+            if (confirm('This will replace all your current data. Continue?')) {
+              // Import all data to localStorage
+              Object.keys(importedData).forEach(key => {
+                const value = importedData[key];
+                if (typeof value === 'object' && value !== null) {
+                  localStorage.setItem(key, JSON.stringify(value));
+                } else {
+                  localStorage.setItem(key, value);
+                }
+              });
+              
+              alert('Data imported successfully! The page will now reload to apply changes.');
+              // Reload the page to apply imported data
+              window.location.reload();
+            }
+          } catch (e) {
+            alert('Error importing data. Please make sure the file is valid JSON.');
+            console.error('Import error:', e);
+          }
+        };
+        reader.readAsText(file);
+      };
+      
+      // Trigger file selection
+      fileInput.click();
       this.dropdownOpen = false;
     },
     toggleDropdown(event) {
@@ -223,6 +308,11 @@ export default {
   text-decoration: none;
   display: block;
   transition: background-color 0.2s;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.dropdown-menu a:last-child {
+  border-bottom: none;
 }
 
 .dropdown-menu a:hover {
