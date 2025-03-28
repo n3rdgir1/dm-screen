@@ -18,6 +18,12 @@ const routes = [
     name: 'DMScreen',
     component: DMScreen,
   },
+
+  {
+    path: '/player-view',
+    name: 'PlayerView',
+    component: PlayerView,
+  },
 ];
 
 const router = createRouter({
