@@ -10,13 +10,23 @@
             <span class="dropdown-icon">▼</span>
           </button>
           <div class="dropdown-menu" v-show="dropdownOpen" @click.stop>
-            <a href="/dm-screen/player-view">Open Player View</a>
+            <a href="#" @click.prevent="showPlayerViewModal = true">Open Player View</a>
             <a href="#" @click.prevent="exportData">Export Data</a>
             <a href="#" @click.prevent="importData">Import Data</a>
           </div>
         </div>
       </div>
     </div>
+    
+    <!-- Player View Modal -->
+    <ModalDialog 
+      :show="showPlayerViewModal" 
+      title="Player View" 
+      :full-screen="true"
+      @close="showPlayerViewModal = false"
+    >
+      <PlayerView :is-modal="true" />
+    </ModalDialog>
     
     <div class="content">
       <!-- Tab Navigation -->
@@ -79,6 +89,8 @@ import NPCTracker from './NPCTracker.vue';
 import ImageUpload from './ImageUpload.vue';
 import ThinkingMode from './ThinkingMode.vue';
 import InitiativeTracker from './combat/InitiativeTracker.vue';
+import ModalDialog from './Modal.vue';
+import PlayerView from './PlayerView.vue';
 
 export default {
   components: {
@@ -87,11 +99,14 @@ export default {
     ImageUpload,
     ThinkingMode,
     InitiativeTracker,
+    ModalDialog,
+    PlayerView,
   },
   data() {
     return {
       activeTab: 'dashboard',
       dropdownOpen: false,
+      showPlayerViewModal: false,
     };
   },
   methods: {
@@ -183,6 +198,7 @@ export default {
       if (event) event.stopPropagation();
       this.dropdownOpen = !this.dropdownOpen;
     },
+
     handleClickOutside(event) {
       const dropdown = this.$el.querySelector('.dropdown');
       if (dropdown && !dropdown.contains(event.target) && this.dropdownOpen) {
