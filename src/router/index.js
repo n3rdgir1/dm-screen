@@ -9,14 +9,14 @@ const routes = [
     component: DMScreen,
   },
   {
+    path: '/dm-screen/player-view',
+    name: 'PlayerView',
+    component: PlayerView,
+  },
+  {
     path: '/dm-screen',
     name: 'DMScreen',
     component: DMScreen,
-  },
-  {
-    path: '/player-view',
-    name: 'PlayerView',
-    component: PlayerView,
   },
 ];
 

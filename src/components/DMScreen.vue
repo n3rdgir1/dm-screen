@@ -96,7 +96,7 @@ export default {
   },
   methods: {
     openPlayerView() {
-      window.open('/player-view', '_blank');
+      window.open('/dm-screen/player-view', '_blank');
       this.dropdownOpen = false;
     },
     exportData() {
