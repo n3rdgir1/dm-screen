@@ -10,7 +10,7 @@
             <span class="dropdown-icon">▼</span>
           </button>
           <div class="dropdown-menu" v-show="dropdownOpen" @click.stop>
-            <a href="#" @click.prevent="openPlayerView">Open Player View</a>
+            <a href="/dm-screen/player-view">Open Player View</a>
             <a href="#" @click.prevent="exportData">Export Data</a>
             <a href="#" @click.prevent="importData">Import Data</a>
           </div>
@@ -95,10 +95,6 @@ export default {
     };
   },
   methods: {
-    openPlayerView() {
-      window.open('/dm-screen/player-view');
-      this.dropdownOpen = false;
-    },
     exportData() {
       // Collect all data from localStorage
       const exportData = {};
