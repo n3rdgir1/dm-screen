@@ -10,7 +10,7 @@ const routes = [
   },
   {
     path: '/dm-screen/player-view',
-    name: 'PlayerView',
+    name: 'DMScreenPlayerView',
     component: PlayerView,
   },
   {
